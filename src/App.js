@@ -42,17 +42,75 @@ function App() {
       });
     });
   };
+
+  let updateTodo = (todo) => {
+    //server
+    fetch(`http://localhost:3001/todos/${todo.id}`, {
+      method: "PATCH",
+      header: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(todo),
+    });
+    //client
+    setTodos((prevState) => {
+      return prevState.map((t) => {
+        if (t.id === todo.id) {
+          return todo;
+        }
+        return t;
+      });
+    });
+  };
+
+  let remainingCount = todos.filter((t) => !t.completed).length;
+
+  let checkAll = () => {
+    //server
+    todos.forEach((t) => {
+      t.completed = true;
+      updateTodo(t);
+    });
+    //client
+    setTodos((prevState) => {
+      return prevState.map((t) => {
+        return { ...t, completed: true };
+      });
+    });
+  };
+
+  let clearCompletedTodo = () => {
+    //server
+    todos.forEach((t) => {
+      if (t.completed) {
+        deleteTodo(t.id);
+      }
+    });
+    //client
+    setTodos((prevState) => {
+      return prevState.filter((t) => {
+        return !t.completed;
+      });
+    });
+  };
   return (
     <div className="todo-app-container">
       <div className="todo-app">
         <h2>Todo App</h2>
         <TodoForm addTodo={addTodo} />
-        <TodoList todos={todos} deleteTodo={deleteTodo} />
-        <CheckAllAndRemaining />
+        <TodoList
+          todos={todos}
+          deleteTodo={deleteTodo}
+          updateTodo={updateTodo}
+        />
+        <CheckAllAndRemaining
+          remainingCount={remainingCount}
+          checkAll={checkAll}
+        />
 
         <div className="other-buttons-container">
           <TodoFilters />
-          <ClearCompleteBtn />
+          <ClearCompleteBtn clearCompletedTodo={clearCompletedTodo} />
         </div>
       </div>
     </div>
